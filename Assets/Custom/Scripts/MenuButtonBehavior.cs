@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class MenuButtonBehavior : MonoBehaviour
 {
+    private GameObject title;
+    private GameObject parent;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        title = GameObject.Find("MainTitle");
+        parent = GameObject.Find("OkButton");
     }
 
     // Update is called once per frame
@@ -16,5 +20,11 @@ public class MenuButtonBehavior : MonoBehaviour
         
     }
 
-    public void MyAction() => Debug.Log("Coucou");
+    public void MyAction() 
+    {
+        Debug.Log("Coucou");
+        title.SetActive(false);
+        parent.SetActive(false);
+    }
+        
 }
