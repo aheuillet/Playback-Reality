@@ -23,5 +23,8 @@ sysinfo.txt
 # Ignore example files
 Assets/MixedRealityToolkit.Examples/*
 
-#Ignore VSCode files
+# Ignore VSCode files
 .vscode/*
+
+# Ignore build files
+App/*
