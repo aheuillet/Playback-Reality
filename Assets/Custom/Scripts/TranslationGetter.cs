@@ -8,15 +8,19 @@ public class Model_Trans
 {
     public ObjectId _id { set; get; }
 
-    public int x { private set; get; }
-    public int y { private set; get; }
-    public int z { private set; get; }
+    public int x_trans { private set; get; }
+    public int y_trans { private set; get; }
+    public int z_trans { private set; get; }
+    public int x_rot { private set; get; }
+    public int y_rot { private set; get; }
+    public int z_rot { private set; get; }
+    public int w { private set; get; }
     public int frame_number { private set; get; }
-    public string trans_type { private set; get; }
+    public string trans_type { set; get; }
 
     //Possible Methods ...
 
-    public override string ToString() => "Translation: \n Type: " + trans_type + "\n x: " + x + "\n y: " + y + "\n z: " + z;
+    public override string ToString() => "Translation: \n Type: " + trans_type + "\n x_trans: " + x_trans + "\n y_trans: " + y_trans + "\n z_trans: " + z_trans;
 }
 
 class TransComp : IComparer<Model_Trans> 
@@ -44,6 +48,7 @@ public class TranslationGetter : MonoBehaviour
     private IMongoCollection<Model_Trans> translations;
     private List<Model_Trans> transList;
     private Animator animator;
+    private GameObject skeleton;
 
 
     // Start is called before the first frame update
@@ -55,39 +60,92 @@ public class TranslationGetter : MonoBehaviour
         transList = translations.Find(trans => true).ToList();
         transList.Sort(new TransComp());
         animator = GetComponent<Animator>();
+        skeleton = this.gameObject.transform.GetChild(0).gameObject;
     }
 
-    // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
-        
+      Output_GetSubjectRootSegmentName OGSRSN = Client.GetSubjectRootSegmentName(SubjectName);
+      Transform Root = transform.root;
+      FindAndTransform( Root, OGSRSN.SegmentName);
     }
 
-    void OnAnimatorTk() 
+    string strip(string BoneName)
     {
-        Transform tf;
-        int currentFrameNumber = transList[0].frame_number;
-        while (transList[0].frame_number == currentFrameNumber)
-        {
-            Model_Trans trans = transList[0];   
-            switch (trans.trans_type)
-            {
-                case "Left Hand":
-                    tf = this.animator.GetBoneTransform(HumanBodyBones.LeftHand);
-                    animator.SetIKPositionWeight(AvatarIKGoal.LeftHand,1);
-                    animator.SetIKRotationWeight(AvatarIKGoal.LeftHand,1);
-                    animator.SetIKPosition(AvatarIKGoal.LeftHand, new Vector3(trans.x, trans.y, trans.z));   
-                case "Right Hand":
-                case "Left Foot":
-                case "Right Foot":
-                case "Tibia":
-                case "Femur":
-                case "Head":
-                default:
-            }
-            transList.Remove(trans);
+      if (BoneName.Contains(":"))
+      {
+        string[] results = BoneName.Split(':');
+        return results[1];
+      }
+      return BoneName;
+    }
+    void FindAndTransform(Transform iTransform, string BoneName )
+    {
+      int ChildCount = iTransform.childCount;
+      for (int i = 0; i < ChildCount; ++i)
+      {
+        Transform Child = iTransform.GetChild(i);
+        if( strip( Child.name) == BoneName )
+        { 
+          ApplyBoneTransform(Child);
+          TransformChildren(Child);
+          break;
         }
+        // if not finding root in this layer, try the children
+        FindAndTransform(Child, BoneName);
+      }
     }
+    void TransformChildren(Transform iTransform )
+    {
+      int ChildCount = iTransform.childCount;
+      for (int i = 0; i < ChildCount; ++i)
+      {
+        Transform Child = iTransform.GetChild(i);
+        ApplyBoneTransform(Child);
+        TransformChildren(Child);
+      }
+    }
+
+    Model_Trans FindBoneInTrans(string BoneName) 
+    {
+        foreach (Model_Trans trans in transList)
+        {
+            if (trans.trans_type == BoneName)
+            {
+                return trans;
+            }
+        }
+        Debug.LogError("No corresponding bone found");
+        Model_Trans a = new Model_Trans();
+        a.trans_type = "default";
+        return a;
+    }
+
+    private void ApplyBoneTransform(Transform Bone)
+    {
+      string BoneName = strip(Bone.gameObject.name);
+      // update the bone transform from the data stream
+      Model_Trans t = FindBoneInTrans(BoneName);
+      if (t.trans_type != "default")
+      {
+        Quaternion Rot = new Quaternion((float)t.x_rot, (float)t.y_rot, (float)t.z_rot, (float)t.w);
+        // mapping right hand to left hand flipping x
+        Bone.localRotation = new Quaternion(Rot.x, -Rot.y, -Rot.z, Rot.w);
+    
+        Vector3 Translate = new Vector3((float)t.x_trans * 0.001f, (float)t.y_trans * 0.001f, (float)t.z_trans * 0.001f);
+        Bone.localPosition = new Vector3(-Translate.x, Translate.y, Translate.z);
+      }
+
+      /* // If there's a scale for this subject in the datastream, apply it here.
+      if (IsScaled)
+      {
+        Output_GetSegmentStaticScale OScale = Client.GetSegmentScale(SubjectName, BoneName);
+        if (OScale.Result == Result.Success)
+        {
+          Bone.localScale = new Vector3((float)OScale.Scale[0], (float)OScale.Scale[1], (float)OScale.Scale[2]);
+        }
+      }*/
+    } 
 
     /* 
         AnimationEvent TransToAnim(Model_Trans t) 
