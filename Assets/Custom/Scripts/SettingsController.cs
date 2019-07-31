@@ -14,9 +14,9 @@ public class SettingsController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ServerIP = GameObject.Find("ServerIPInputField").GetComponent<TMP_InputField>();
-        PortNumber = GameObject.Find("PortNumberInputField").GetComponent<TMP_InputField>();
-        DatabaseName = GameObject.Find("DatabaseNameInputField").GetComponent<TMP_InputField>();
+        ServerIP = GameObject.Find("ServerIpInputField").GetComponentInChildren<TMP_InputField>();
+        PortNumber = GameObject.Find("PortNumberInputField").GetComponentInChildren<TMP_InputField>();
+        DatabaseName = GameObject.Find("DatabaseNameInputField").GetComponentInChildren<TMP_InputField>();
         Settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
 
         ServerIP.text = Settings.ServerIP;
