@@ -77,7 +77,7 @@ public class TranslationGetter : MonoBehaviour
         {
            GameObject.Find("ErrorPanel1").SetActive(true); 
         }
-        translations = db.GetCollection<Model_Trans>("translations");
+        translations = db.GetCollection<Model_Trans>(COLLECTION_NAME);
         transList = translations.Find(trans => true).ToList();
         transList.Sort(new TransComp());
         animator = GetComponent<Animator>();

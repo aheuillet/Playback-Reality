@@ -22,6 +22,6 @@ public class InputFieldController : MonoBehaviour
     public void Activate() 
     {
         field.Select();
-        field.ActivateInputField();
+        //field.ActivateInputField();
     }
 }
