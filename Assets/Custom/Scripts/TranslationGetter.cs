@@ -8,25 +8,26 @@ public class Model_Trans
 {
     public ObjectId _id { set; get; }
 
-    public int x_trans { private set; get; }
-    public int y_trans { private set; get; }
-    public int z_trans { private set; get; }
-    public int x_rot { private set; get; }
-    public int y_rot { private set; get; }
-    public int z_rot { private set; get; }
-    public int w { private set; get; }
+    public double x_trans { private set; get; }
+    public double y_trans { private set; get; }
+    public double z_trans { private set; get; }
+    public double x_rot { private set; get; }
+    public double y_rot { private set; get; }
+    public double z_rot { private set; get; }
+    public double w { private set; get; }
     public int frame_number { private set; get; }
-    public string trans_type { set; get; }
+    public string segment_name { set; get; }
+    public string translation_type { private set; get; }
 
     //Possible Methods ...
 
-    public override string ToString() => "Translation: \n Type: " + trans_type + "\n x_trans: " + x_trans + "\n y_trans: " + y_trans + "\n z_trans: " + z_trans;
+    public override string ToString() => "Translation: \n Type: " + translation_type + "\n x_trans: " + x_trans + "\n y_trans: " + y_trans + "\n z_trans: " + z_trans;
 }
 
 public class Model_Root
 {
     public ObjectId _id { set; get; }
-    public string name { private set; get; }
+    public string root_segment_name { private set; get; }
     public string collection_name { private set; get; }
 }
 
@@ -50,7 +51,7 @@ public class TranslationGetter : MonoBehaviour
 {
     private const string MONGO_URI = "mongodb://127.0.0.1:27017";
     private const string DATABASE_NAME = "vicon";
-    private const string COLLECTION_NAME = "";
+    private const string COLLECTION_NAME = "Mike_2019-08-02 02:38:10.700751";
     private MongoClient client;
     private IMongoDatabase db;
     private IMongoCollection<Model_Trans> translations;
@@ -95,7 +96,7 @@ public class TranslationGetter : MonoBehaviour
     {
         rootSegments = db.GetCollection<Model_Root>("root_segments");
         var filter = Builders<Model_Root>.Filter.Eq("collection_name", CollectionName);
-        return rootSegments.Find(filter).First().name;
+        return rootSegments.Find(filter).First().root_segment_name;
     }
 
     string strip(string BoneName)
@@ -113,6 +114,7 @@ public class TranslationGetter : MonoBehaviour
         for (int i = 0; i < ChildCount; ++i)
         {
             Transform Child = iTransform.GetChild(i);
+            Debug.Log(Child.name);
             if (strip(Child.name) == BoneName)
             {
                 ApplyBoneTransform(Child);
@@ -138,14 +140,14 @@ public class TranslationGetter : MonoBehaviour
     {
         foreach (Model_Trans trans in transList)
         {
-            if (trans.trans_type == BoneName)
+            if (trans.segment_name == BoneName)
             {
                 return trans;
             }
         }
         Debug.LogError("No corresponding bone found");
         Model_Trans a = new Model_Trans();
-        a.trans_type = "default";
+        a.segment_name = "default";
         return a;
     }
 
@@ -154,7 +156,7 @@ public class TranslationGetter : MonoBehaviour
         string BoneName = strip(Bone.gameObject.name);
         // update the bone transform from the data stream
         Model_Trans t = FindBoneInTrans(BoneName);
-        if (t.trans_type != "default")
+        if (t.segment_name != "default")
         {
             Quaternion Rot = new Quaternion((float)t.x_rot, (float)t.y_rot, (float)t.z_rot, (float)t.w);
             // mapping right hand to left hand flipping x
