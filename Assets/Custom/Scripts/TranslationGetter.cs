@@ -51,15 +51,13 @@ public class TranslationGetter : MonoBehaviour
 {
     private const string MONGO_URI = "mongodb://127.0.0.1:27017";
     private const string DATABASE_NAME = "vicon";
-    private const string COLLECTION_NAME = "Mike_2019-08-02 02:38:10.700751";
+    private const string COLLECTION_NAME = "Mike_2019-08-05 04:40:36.702348";
     private MongoClient client;
     private IMongoDatabase db;
     private IMongoCollection<Model_Trans> translations;
     private IMongoCollection<Model_Root> rootSegments;
     private string rootSegmentName;
     private List<Model_Trans> transList;
-    private Animator animator;
-    private GameObject skeleton;
 
 
     // Start is called before the first frame update
@@ -81,13 +79,11 @@ public class TranslationGetter : MonoBehaviour
         translations = db.GetCollection<Model_Trans>(COLLECTION_NAME);
         transList = translations.Find(trans => true).ToList();
         transList.Sort(new TransComp());
-        animator = GetComponent<Animator>();
-        skeleton = this.gameObject.transform.GetChild(0).gameObject;
     }
 
     void LateUpdate()
     {
-        rootSegmentName = GetSubjectRootSegmentName(COLLECTION_NAME);
+        rootSegmentName = "Solving";
         Transform Root = transform.root;
         FindAndTransform(Root, rootSegmentName);
     }
@@ -108,13 +104,13 @@ public class TranslationGetter : MonoBehaviour
         }
         return BoneName;
     }
+
     void FindAndTransform(Transform iTransform, string BoneName)
     {
         int ChildCount = iTransform.childCount;
         for (int i = 0; i < ChildCount; ++i)
         {
             Transform Child = iTransform.GetChild(i);
-            Debug.Log(Child.name);
             if (strip(Child.name) == BoneName)
             {
                 ApplyBoneTransform(Child);
@@ -125,6 +121,7 @@ public class TranslationGetter : MonoBehaviour
             FindAndTransform(Child, BoneName);
         }
     }
+
     void TransformChildren(Transform iTransform)
     {
         int ChildCount = iTransform.childCount;
@@ -136,16 +133,16 @@ public class TranslationGetter : MonoBehaviour
         }
     }
 
-    Model_Trans FindBoneInTrans(string BoneName)
+    Model_Trans FindBoneInTransList(string BoneName)
     {
         foreach (Model_Trans trans in transList)
         {
-            if (trans.segment_name == BoneName)
+            if ((trans.segment_name == BoneName) || ((BoneName == "Solving") && (trans.segment_name == GetSubjectRootSegmentName(COLLECTION_NAME))))
             {
                 return trans;
             }
         }
-        Debug.LogError("No corresponding bone found");
+        //Debug.LogError("No corresponding bone found for name " + BoneName);
         Model_Trans a = new Model_Trans();
         a.segment_name = "default";
         return a;
@@ -155,7 +152,7 @@ public class TranslationGetter : MonoBehaviour
     {
         string BoneName = strip(Bone.gameObject.name);
         // update the bone transform from the data stream
-        Model_Trans t = FindBoneInTrans(BoneName);
+        Model_Trans t = FindBoneInTransList(BoneName);
         if (t.segment_name != "default")
         {
             Quaternion Rot = new Quaternion((float)t.x_rot, (float)t.y_rot, (float)t.z_rot, (float)t.w);
