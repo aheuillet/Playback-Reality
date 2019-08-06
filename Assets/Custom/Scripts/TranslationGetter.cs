@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using Dweiss;
 
 public class Model_Trans
 {
@@ -49,9 +50,10 @@ class TransComp : IComparer<Model_Trans>
 
 public class TranslationGetter : MonoBehaviour
 {
-    private const string MONGO_URI = "mongodb://127.0.0.1:27017";
-    private const string DATABASE_NAME = "vicon";
-    private const string COLLECTION_NAME = "Mike_2019-08-05 04:40:36.702348";
+    private Settings settings;
+    private const string MONGO_URI;
+    private const string DATABASE_NAME;
+    private const string COLLECTION_NAME;
     private MongoClient client;
     private IMongoDatabase db;
     private IMongoCollection<Model_Trans> translations;
@@ -63,6 +65,9 @@ public class TranslationGetter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
+        MONGO_URI = "mongodb://" + settings.ServerIP + ":" + settings.PortNumber;
+        DATABASE_NAME = settings.DatabaseName;
         try
         {
             client = new MongoClient(MONGO_URI);
@@ -137,7 +142,7 @@ public class TranslationGetter : MonoBehaviour
     {
         foreach (Model_Trans trans in transList)
         {
-            if ((trans.segment_name == BoneName) || ((BoneName == "Solving") && (trans.segment_name == GetSubjectRootSegmentName(COLLECTION_NAME))))
+            if ((trans.segment_name == BoneName) || ((BoneName == "Solving") && (trans.segment_name == "Root")))
             {
                 return trans;
             }
