@@ -18,6 +18,7 @@ namespace Dweiss {
         public string ServerIP = "127.0.0.1";
         public string PortNumber = "27017";
         public string DatabaseName = "vicon";
+        public string CollectionName = "";
 
        
 

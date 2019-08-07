@@ -51,9 +51,9 @@ class TransComp : IComparer<Model_Trans>
 public class TranslationGetter : MonoBehaviour
 {
     private Settings settings;
-    private const string MONGO_URI;
-    private const string DATABASE_NAME;
-    private const string COLLECTION_NAME;
+    private string MONGO_URI;
+    private string DATABASE_NAME;
+    private string COLLECTION_NAME;
     private MongoClient client;
     private IMongoDatabase db;
     private IMongoCollection<Model_Trans> translations;
@@ -68,6 +68,7 @@ public class TranslationGetter : MonoBehaviour
         settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
         MONGO_URI = "mongodb://" + settings.ServerIP + ":" + settings.PortNumber;
         DATABASE_NAME = settings.DatabaseName;
+        COLLECTION_NAME = settings.CollectionName;
         try
         {
             client = new MongoClient(MONGO_URI);
@@ -93,12 +94,12 @@ public class TranslationGetter : MonoBehaviour
         FindAndTransform(Root, rootSegmentName);
     }
 
-    string GetSubjectRootSegmentName(string CollectionName)
+    /* string GetSubjectRootSegmentName(string CollectionName)
     {
         rootSegments = db.GetCollection<Model_Root>("root_segments");
         var filter = Builders<Model_Root>.Filter.Eq("collection_name", CollectionName);
         return rootSegments.Find(filter).First().root_segment_name;
-    }
+    } */
 
     string strip(string BoneName)
     {
@@ -142,8 +143,9 @@ public class TranslationGetter : MonoBehaviour
     {
         foreach (Model_Trans trans in transList)
         {
-            if ((trans.segment_name == BoneName) || ((BoneName == "Solving") && (trans.segment_name == "Root")))
+            if ((trans.segment_name == BoneName))
             {
+                transList.Remove(trans);
                 return trans;
             }
         }

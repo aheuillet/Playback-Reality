@@ -1,1 +1,1 @@
-{"ServerIP":"127.0.0.1","PortNumber":"27017","DatabaseName":"vicon"}
+{"ServerIP":"127.0.0.1","PortNumber":"27017","DatabaseName":"vicon","CollectionName":"Mike_2019-08-07 07:25:39.942862"}

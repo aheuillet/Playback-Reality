@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -415,7 +415,12 @@ PrefabInstance:
     - target: {fileID: 114197126443554526, guid: ab3ba7ff6ff00b24c8e78d1c15757f43,
         type: 3}
       propertyPath: DatabaseName
-      value: test
+      value: vicon
+      objectReference: {fileID: 0}
+    - target: {fileID: 114197126443554526, guid: ab3ba7ff6ff00b24c8e78d1c15757f43,
+        type: 3}
+      propertyPath: CollectionName
+      value: Mike_2019-08-07 07:25:39.942862
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ab3ba7ff6ff00b24c8e78d1c15757f43, type: 3}
@@ -1113,6 +1118,24 @@ MonoBehaviour:
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
+--- !u!1 &1100678543 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6934605739385980499, guid: 54d2b111e02032443b4b577a13fd554c,
+    type: 3}
+  m_PrefabInstance: {fileID: 108720759}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1100678544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100678543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7a4ba23961bb124a9c8839c39321018, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1293251162
 PrefabInstance:
   m_ObjectHideFlags: 0
