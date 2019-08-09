@@ -553,6 +553,7 @@ namespace Microsoft.MixedReality.Toolkit.WindowsMixedReality.SpatialAwareness
             // Update the observer
             switch(ObserverVolumeType)
             {
+            #if !UNITY_EDITOR
                 case VolumeType.AxisAlignedCube:
                     observer.SetVolumeAsAxisAlignedBox(ObserverOrigin, ObservationExtents);
                     break;
@@ -569,6 +570,7 @@ namespace Microsoft.MixedReality.Toolkit.WindowsMixedReality.SpatialAwareness
                 default:
                     Debug.LogError($"Unsupported ObserverVolumeType value {ObserverVolumeType}");
                     break;
+            #endif
             }
         }
 

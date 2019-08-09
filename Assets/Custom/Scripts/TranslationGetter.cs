@@ -66,9 +66,11 @@ public class TranslationGetter : MonoBehaviour
     void Start()
     {
         settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
+        settings.LoadToScript();
         MONGO_URI = "mongodb://" + settings.ServerIP + ":" + settings.PortNumber;
         DATABASE_NAME = settings.DatabaseName;
         COLLECTION_NAME = settings.CollectionName;
+        Debug.Log("Collection name: " + COLLECTION_NAME);
         try
         {
             client = new MongoClient(MONGO_URI);
@@ -78,20 +80,23 @@ public class TranslationGetter : MonoBehaviour
             GameObject.Find("ErrorPanel2").SetActive(true);
         }
         db = client.GetDatabase(DATABASE_NAME);
-        if (db.ListCollectionNames().ToList().Count == 0)
-        {
-           GameObject.Find("ErrorPanel1").SetActive(true); 
-        }
         translations = db.GetCollection<Model_Trans>(COLLECTION_NAME);
         transList = translations.Find(trans => true).ToList();
         transList.Sort(new TransComp());
+        if (db.ListCollectionNames().ToList().Count == 0 | transList.Count == 0)
+        {
+           GameObject.Find("ErrorPanel1").SetActive(true); 
+        }
     }
 
     void LateUpdate()
     {
-        rootSegmentName = "Solving";
-        Transform Root = transform.root;
-        FindAndTransform(Root, rootSegmentName);
+        if (transList.Count != 0) 
+        {
+            rootSegmentName = "Root";
+            Transform Root = transform.root;
+            FindAndTransform(Root, rootSegmentName);
+        }
     }
 
     /* string GetSubjectRootSegmentName(string CollectionName)

@@ -48,7 +48,7 @@ namespace Dweiss
         protected void OnValidate()
         {
 #if UNITY_EDITOR
-            if (AutoSave && Application.isPlaying == false)
+            if (AutoSave && Application.isPlaying == true)
             {
                 //Debug.Log("Auto save " + Application.isPlaying + " " );
                 SaveToFile(false);

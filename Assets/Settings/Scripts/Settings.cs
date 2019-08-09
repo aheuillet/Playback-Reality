@@ -15,10 +15,10 @@ namespace Dweiss {
 	public class Settings : ASettings {
 
         [Header("--Application Settings--")]
-        public string ServerIP = "127.0.0.1";
+        public string ServerIP = "192.168.4.77";
         public string PortNumber = "27017";
         public string DatabaseName = "vicon";
-        public string CollectionName = "";
+        public string CollectionName = "Mike_2019-08-08 06:58:46.637068";
 
        
 
