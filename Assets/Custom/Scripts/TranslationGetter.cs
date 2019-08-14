@@ -51,9 +51,9 @@ class TransComp : IComparer<Model_Trans>
 public class TranslationGetter : MonoBehaviour
 {
     private Settings settings;
-    private string MONGO_URI;
-    private string DATABASE_NAME;
-    private string COLLECTION_NAME;
+    private string MONGO_URI = "mongodb://192.168.4.77:27017";
+    private string DATABASE_NAME = "vicon";
+    private string COLLECTION_NAME = "Mike_2019-08-14 04:25:17.710194";
     private MongoClient client;
     private IMongoDatabase db;
     private IMongoCollection<Model_Trans> translations;
@@ -65,28 +65,35 @@ public class TranslationGetter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
-        settings.LoadToScript();
-        MONGO_URI = "mongodb://" + settings.ServerIP + ":" + settings.PortNumber;
+        /* settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
+        settings.LoadToScript(); */
+        /* MONGO_URI = "mongodb://" + settings.ServerIP + ":" + settings.PortNumber;
         DATABASE_NAME = settings.DatabaseName;
-        COLLECTION_NAME = settings.CollectionName;
+        COLLECTION_NAME = settings.CollectionName; */
         Debug.Log("Collection name: " + COLLECTION_NAME);
-        try
+        client = new MongoClient(MONGO_URI);
+        /* try
         {
-            client = new MongoClient(MONGO_URI);
         }
         catch (System.TimeoutException)
         {
             GameObject.Find("ErrorPanel2").SetActive(true);
-        }
+        } */
         db = client.GetDatabase(DATABASE_NAME);
         translations = db.GetCollection<Model_Trans>(COLLECTION_NAME);
         transList = translations.Find(trans => true).ToList();
+        /* try 
+        {
+        }
+        catch(System.TimeoutException) 
+        {
+            GameObject.Find("ErrorPanel2").SetActive(true);
+        } */
         transList.Sort(new TransComp());
-        if (db.ListCollectionNames().ToList().Count == 0 | transList.Count == 0)
+        /* if (db.ListCollectionNames().ToList().Count == 0 | transList.Count == 0)
         {
            GameObject.Find("ErrorPanel1").SetActive(true); 
-        }
+        } */
     }
 
     void LateUpdate()
@@ -168,11 +175,10 @@ public class TranslationGetter : MonoBehaviour
         if (t.segment_name != "default")
         {
             Quaternion Rot = new Quaternion((float)t.x_rot, (float)t.y_rot, (float)t.z_rot, (float)t.w);
-            // mapping right hand to left hand flipping x
-            Bone.localRotation = new Quaternion(Rot.x, -Rot.y, -Rot.z, Rot.w);
+            Bone.localRotation = new Quaternion(Rot.x, Rot.y, Rot.z, Rot.w);
 
             Vector3 Translate = new Vector3((float)t.x_trans * 0.001f, (float)t.y_trans * 0.001f, (float)t.z_trans * 0.001f);
-            Bone.localPosition = new Vector3(-Translate.x, Translate.y, Translate.z);
+            Bone.localPosition = new Vector3(Translate.x, Translate.y, Translate.z);
         }
     }
 
