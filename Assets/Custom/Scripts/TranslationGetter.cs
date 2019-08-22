@@ -66,7 +66,7 @@ public class TranslationGetter : MonoBehaviour
         IEnumerator couroutine = GetJsonTextFromURL(URL);
         yield return StartCoroutine(couroutine);
         transList.Sort(new TransComp());
-        this.gameObject.transform.Rotate(-79.15f, 0.0f, -173.728f);
+        this.gameObject.transform.Rotate(-79.15f, 0.0f, -173.728f); //Rotating GameObject to macth Unity axis orientation
     }
 
     IEnumerator GetJsonTextFromURL(string URL) {
@@ -78,7 +78,6 @@ public class TranslationGetter : MonoBehaviour
         }
         else {
            transList = JsonConvert.DeserializeObject<List<Model_Trans>>(request.downloadHandler.text);
-           Debug.Log(JsonConvert.SerializeObject(transList));
         }
     }
 
@@ -91,7 +90,7 @@ public class TranslationGetter : MonoBehaviour
             FindAndTransform(Root, rootSegmentName);
         }
         else {
-            Debug.Log("translist is null!");
+            //Debug.Log("translist is null!");
         }
     }
 
