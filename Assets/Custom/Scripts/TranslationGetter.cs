@@ -1,36 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MongoDB.Driver;
-using MongoDB.Bson;
 using Dweiss;
+using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 public class Model_Trans
 {
-    public ObjectId _id { set; get; }
+    public int _id { set; get; }
 
-    public double x_trans { private set; get; }
-    public double y_trans { private set; get; }
-    public double z_trans { private set; get; }
-    public double x_rot { private set; get; }
-    public double y_rot { private set; get; }
-    public double z_rot { private set; get; }
-    public double w { private set; get; }
-    public int frame_number { private set; get; }
+    public double x_trans {set; get; }
+    public double y_trans { set; get; }
+    public double z_trans { set; get; }
+    public double x_rot { set; get; }
+    public double y_rot { set; get; }
+    public double z_rot { set; get; }
+    public double w { set; get; }
+    public int frame_number { set; get; }
     public string segment_name { set; get; }
-    public string translation_type { private set; get; }
+    public string translation_type { set; get; }
 
     //Possible Methods ...
 
     public override string ToString() => "Translation: \n Type: " + translation_type + "\n x_trans: " + x_trans + "\n y_trans: " + y_trans + "\n z_trans: " + z_trans;
 }
 
-public class Model_Root
-{
-    public ObjectId _id { set; get; }
-    public string root_segment_name { private set; get; }
-    public string collection_name { private set; get; }
-}
 
 class TransComp : IComparer<Model_Trans>
 {
@@ -51,67 +45,55 @@ class TransComp : IComparer<Model_Trans>
 public class TranslationGetter : MonoBehaviour
 {
     private Settings settings;
-    private string MONGO_URI = "mongodb://192.168.4.77:27017";
+    private string SERVER_HOST = "192.168.4.77/middleware";
     private string DATABASE_NAME = "vicon";
     private string COLLECTION_NAME = "Mike_2019-08-14 04:25:17.710194";
-    private MongoClient client;
-    private IMongoDatabase db;
-    private IMongoCollection<Model_Trans> translations;
-    private IMongoCollection<Model_Root> rootSegments;
     private string rootSegmentName;
     private List<Model_Trans> transList;
 
 
     // Start is called before the first frame update
-    void Start()
+    IEnumerator Start()
     {
-        /* settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
-        settings.LoadToScript(); */
-        /* MONGO_URI = "mongodb://" + settings.ServerIP + ":" + settings.PortNumber;
-        DATABASE_NAME = settings.DatabaseName;
-        COLLECTION_NAME = settings.CollectionName; */
-        Debug.Log("Collection name: " + COLLECTION_NAME);
-        client = new MongoClient(MONGO_URI);
-        /* try
-        {
-        }
-        catch (System.TimeoutException)
-        {
-            GameObject.Find("ErrorPanel2").SetActive(true);
-        } */
-        db = client.GetDatabase(DATABASE_NAME);
-        translations = db.GetCollection<Model_Trans>(COLLECTION_NAME);
-        transList = translations.Find(trans => true).ToList();
-        /* try 
-        {
-        }
-        catch(System.TimeoutException) 
-        {
-            GameObject.Find("ErrorPanel2").SetActive(true);
-        } */
+        settings = GameObject.Find("SettingsSingleton").GetComponent<Settings>();
+        if (settings) {
+            settings.LoadToScript();
+            DATABASE_NAME = settings.DatabaseName;
+            COLLECTION_NAME = settings.CollectionName;
+            SERVER_HOST = settings.ServerIP;
+        }        
+        string URL = "http://" + SERVER_HOST + "?collection=" + COLLECTION_NAME;
+        IEnumerator couroutine = GetJsonTextFromURL(URL);
+        yield return StartCoroutine(couroutine);
         transList.Sort(new TransComp());
-        /* if (db.ListCollectionNames().ToList().Count == 0 | transList.Count == 0)
-        {
-           GameObject.Find("ErrorPanel1").SetActive(true); 
-        } */
+        this.gameObject.transform.Rotate(-79.15f, 0.0f, -173.728f);
+    }
+
+    IEnumerator GetJsonTextFromURL(string URL) {
+        UnityWebRequest request = new UnityWebRequest();
+        request = UnityWebRequest.Get(URL);
+        yield return request.SendWebRequest();
+        if(request.isNetworkError || request.isHttpError) {
+            Debug.Log(request.error);
+        }
+        else {
+           transList = JsonConvert.DeserializeObject<List<Model_Trans>>(request.downloadHandler.text);
+           Debug.Log(JsonConvert.SerializeObject(transList));
+        }
     }
 
     void LateUpdate()
     {
-        if (transList.Count != 0) 
+        if (transList != null) 
         {
             rootSegmentName = "Root";
             Transform Root = transform.root;
             FindAndTransform(Root, rootSegmentName);
         }
+        else {
+            Debug.Log("translist is null!");
+        }
     }
-
-    /* string GetSubjectRootSegmentName(string CollectionName)
-    {
-        rootSegments = db.GetCollection<Model_Root>("root_segments");
-        var filter = Builders<Model_Root>.Filter.Eq("collection_name", CollectionName);
-        return rootSegments.Find(filter).First().root_segment_name;
-    } */
 
     string strip(string BoneName)
     {
@@ -175,10 +157,11 @@ public class TranslationGetter : MonoBehaviour
         if (t.segment_name != "default")
         {
             Quaternion Rot = new Quaternion((float)t.x_rot, (float)t.y_rot, (float)t.z_rot, (float)t.w);
-            Bone.localRotation = new Quaternion(Rot.x, Rot.y, Rot.z, Rot.w);
+            // flipping the x-axis (because Unity is a right-handed system while Vicon is a left-handed system)
+            Bone.localRotation = new Quaternion(Rot.x, -Rot.y, -Rot.z, Rot.w);
 
             Vector3 Translate = new Vector3((float)t.x_trans * 0.001f, (float)t.y_trans * 0.001f, (float)t.z_trans * 0.001f);
-            Bone.localPosition = new Vector3(Translate.x, Translate.y, Translate.z);
+            Bone.localPosition = new Vector3(-Translate.x, Translate.y, Translate.z);
         }
     }
 

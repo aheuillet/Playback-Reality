@@ -1,1 +1,1 @@
-{"ServerIP":"192.168.4.77","PortNumber":"27017","DatabaseName":"vicon","CollectionName":"Mike_2019-08-08 06:58:46.637068"}
+{"ServerIP":"192.168.4.77/middleware","PortNumber":"27017","DatabaseName":"vicon","CollectionName":"Mike_2019-08-08 06:58:46.637068"}
